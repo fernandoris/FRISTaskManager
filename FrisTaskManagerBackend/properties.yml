@@ -2,8 +2,8 @@ logging:
   level: WARN
 database:
   driverClass: com.mysql.cj.jdbc.Driver
-  user: root
-  password: example
+  user: ${DB_USER}
+  password: ${DB_PASS}
   url: jdbc:mysql://db:3306/fristaskmanager?createDatabaseIfNotExist=true
   properties:
     charSet: UTF-8
