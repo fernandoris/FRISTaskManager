@@ -10,6 +10,7 @@ import io.dropwizard.core.setup.Bootstrap;
 import io.dropwizard.core.setup.Environment;
 import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.hibernate.HibernateBundle;
+import org.hibernate.SessionFactory;
 
 public class TaskManagerApplication extends Application<TaskManagerConfiguration> {
 
@@ -25,17 +26,15 @@ public class TaskManagerApplication extends Application<TaskManagerConfiguration
     }
     public void run(TaskManagerConfiguration configuration, Environment environment) throws Exception {
 
-        TaskManagerHealthCheck healthCheck = new TaskManagerHealthCheck(configuration.getTemplate());
-        environment.healthChecks().register("template", healthCheck);
+        SessionFactory sessionFactory = hibernate.getSessionFactory();
 
-        final TaskDAO dao = new TaskDAO(hibernate.getSessionFactory());
+        final TaskDAO dao = new TaskDAO(sessionFactory);
         environment.jersey().register(new TaskManagerResource(dao));
 
-    }
+        TaskManagerHealthCheck healthCheck =
+                new TaskManagerHealthCheck(sessionFactory, configuration.getDataSourceFactory().getValidationQuery());
+        environment.healthChecks().register("dbConnectionHealthCheck", healthCheck);
 
-    @Override
-    public String getName() {
-        return "hello-world";
     }
 
     @Override

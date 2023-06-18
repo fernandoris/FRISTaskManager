@@ -1,5 +1,3 @@
-template: Hello, %s!
-defaultName: StrangerThings
 logging:
   level: WARN
 database:

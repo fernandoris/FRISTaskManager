@@ -2,7 +2,6 @@ package com.fris.fristaskmanagerbackend.resources;
 
 import com.fris.fristaskmanagerbackend.api.Task;
 import com.fris.fristaskmanagerbackend.persistence.TaskDAO;
-import com.fris.fristaskmanagerbackend.persistence.TaskEntity;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
@@ -13,7 +12,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -24,6 +22,8 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class TaskManagerResourceTest {
 
+    private static final String TEST_DATE = "2023-06-17";
+
     @Mock
     private TaskDAO taskDAO;
 
@@ -32,8 +32,8 @@ class TaskManagerResourceTest {
 
     @Test
     void testCreateTask() {
-        Task task = Task.builder().tittle("Test Task").date(new Date()).build();
-        when(taskDAO.create(any(TaskEntity.class))).thenReturn(1L);
+        Task task = Task.builder().tittle("Test Task").date(TEST_DATE).build();
+        when(taskDAO.create(any(Task.class))).thenReturn(1L);
 
         Response response = taskManagerResource.createTask(task);
 
@@ -42,20 +42,20 @@ class TaskManagerResourceTest {
 
     @Test
     void testGetAllTasks() {
-        List<TaskEntity> tasks = new ArrayList<>();
-        tasks.add(new TaskEntity(1L, "Test Task 1", new Date()));
-        tasks.add(new TaskEntity(2L, "Test Task 2", new Date()));
+        List<Task> tasks = new ArrayList<>();
+        tasks.add(new Task(1L, "Test Task 1", TEST_DATE));
+        tasks.add(new Task(2L, "Test Task 2", TEST_DATE));
         when(taskDAO.findAll()).thenReturn(tasks);
 
-        List<TaskEntity> result = taskManagerResource.getAllTasks();
+        List<Task> result = taskManagerResource.getAllTasks();
 
         assertEquals(tasks.size(), result.size());
     }
 
     @Test
     void testGetTaskById() {
-        long id = 1L;
-        TaskEntity task = new TaskEntity(id, "Test Task", new Date());
+        String id = "1";
+        Task task = new Task(Long.parseLong(id), "Test Task", TEST_DATE);
         when(taskDAO.findById(id)).thenReturn(task);
 
         Response response = taskManagerResource.getTaskById(id);
@@ -66,7 +66,7 @@ class TaskManagerResourceTest {
 
     @Test
     void testGetTaskByIdNotFound() {
-        long id = 1L;
+        String id = "1";
         when(taskDAO.findById(id)).thenReturn(null);
 
         assertThrows(WebApplicationException.class, () -> taskManagerResource.getTaskById(id));
@@ -74,8 +74,8 @@ class TaskManagerResourceTest {
 
     @Test
     void testUpdateTask() {
-        long id = 1L;
-        Task task = Task.builder().tittle("Test Task").date(new Date()).build();
+        String id = "1";
+        Task task = Task.builder().tittle("Test Task").date(TEST_DATE).build();
         doNothing().when(taskDAO).update(id, task);
 
         Response response = taskManagerResource.updateTask(id, task);
@@ -85,11 +85,26 @@ class TaskManagerResourceTest {
 
     @Test
     public void testUpdateTaskNotFound() {
-        long id = 1L;
-        Task task = Task.builder().tittle("Test Task").date(new Date()).build();
+        String id = "1";
+        Task task = Task.builder().tittle("Test Task").date(TEST_DATE).build();
         doThrow(EntityNotFoundException.class).when(taskDAO).update(id, task);
 
         assertThrows(WebApplicationException.class, () -> taskManagerResource.updateTask(id, task));
+    }
+
+    @Test
+    void testDeleteTask() {
+        String id = "1";
+        doNothing().when(taskDAO).delete(id);
+        taskManagerResource.deleteTask(id);
+        verify(taskDAO, times(1)).delete(id);
+    }
+
+    @Test
+    void testDeleteTaskIdNotFound() {
+        String id = "1";
+        doThrow(EntityNotFoundException.class).when(taskDAO).delete(id);
+        assertThrows(WebApplicationException.class, () -> taskManagerResource.deleteTask(id));
     }
 
 }

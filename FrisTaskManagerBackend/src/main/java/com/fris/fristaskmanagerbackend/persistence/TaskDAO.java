@@ -6,33 +6,41 @@ import jakarta.persistence.EntityNotFoundException;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class TaskDAO extends AbstractDAO<TaskEntity> {
+
+    private static final SimpleDateFormat FORMATTER = new SimpleDateFormat("yyyy-MM-dd");
+
     public TaskDAO(SessionFactory factory) {
         super(factory);
     }
 
-    public TaskEntity findById(Long id) {
+    public Task findById(String id) {
         Transaction transaction = currentSession().beginTransaction();
-        TaskEntity task;
+        TaskEntity taskEntity;
         try {
-            task = get(id);
+            taskEntity = get(id);
             transaction.commit();
         } catch (Exception e) {
             transaction.rollback();
             throw new RuntimeException(e);
         }
-        return task;
+        return Objects.nonNull(taskEntity) ? entityToTask(taskEntity) : null;
     }
 
 
-    public long create(TaskEntity task) {
+    public long create(Task task) {
         long id;
         Transaction transaction = currentSession().beginTransaction();
+
         try {
-            id = persist(task).getId();
+            id = persist(
+                    TaskEntity.builder().tittle(task.getTittle()).date(FORMATTER.parse(task.getDate())).build()
+            ).getId();
             transaction.commit();
         } catch (Exception e) {
             transaction.rollback();
@@ -41,26 +49,26 @@ public class TaskDAO extends AbstractDAO<TaskEntity> {
         return id;
     }
 
-    public List<TaskEntity> findAll() {
-        List<TaskEntity> tasks;
+    public List<Task> findAll() {
+        List<TaskEntity> taskEntities;
         Transaction transaction = currentSession().beginTransaction();
         try {
-            tasks = list(namedTypedQuery("com.fris.fristaskmanagerbackend.persistence.TaskDAO.findAll"));
+            taskEntities = list(namedTypedQuery("com.fris.fristaskmanagerbackend.persistence.TaskDAO.findAll"));
             transaction.commit();
         } catch (Exception e) {
             transaction.rollback();
             throw new RuntimeException(e);
         }
-        return tasks;
+        return taskEntities.stream().map(this::entityToTask).collect(Collectors.toList());
     }
 
-    public void update(long id, Task task) {
+    public void update(String id, Task task) {
         Transaction transaction = currentSession().beginTransaction();
         try {
             TaskEntity taskEntity = get(id);
             if(Objects.nonNull(taskEntity)) {
                 taskEntity.setTittle(task.getTittle());
-                taskEntity.setDate(task.getDate());
+                taskEntity.setDate(FORMATTER.parse(task.getDate()));
                 currentSession().merge(taskEntity);
                 transaction.commit();
             } else {
@@ -75,7 +83,7 @@ public class TaskDAO extends AbstractDAO<TaskEntity> {
         }
     }
 
-    public void delete(long id) {
+    public void delete(String id) {
         Transaction transaction = currentSession().beginTransaction();
         try {
             TaskEntity taskEntity = get(id);
@@ -92,5 +100,13 @@ public class TaskDAO extends AbstractDAO<TaskEntity> {
         } finally {
             transaction.rollback();
         }
+    }
+
+    private Task entityToTask(TaskEntity taskEntity) {
+        return Task.builder()
+                .id(taskEntity.getId())
+                .tittle(taskEntity.getTittle())
+                .date(FORMATTER.format(taskEntity.getDate()))
+                .build();
     }
 }
