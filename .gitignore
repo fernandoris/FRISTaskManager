@@ -33,3 +33,6 @@ build/
 
 ### Mac OS ###
 .DS_Store
+/terraform_local/.terraform/
+/terraform_local/.terraform.lock.hcl
+/terraform_local/terraform.tfstate
