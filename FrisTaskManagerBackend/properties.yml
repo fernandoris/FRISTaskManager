@@ -1,2 +1,19 @@
 template: Hello, %s!
 defaultName: StrangerThings
+logging:
+  level: WARN
+database:
+  driverClass: com.mysql.cj.jdbc.Driver
+  user: root
+  password: example
+  url: jdbc:mysql://localhost:3306/fristaskmanager?createDatabaseIfNotExist=true
+  properties:
+    charSet: UTF-8
+    hibernate.dialect: org.hibernate.dialect.MySQLDialect
+    hibernate.current_session_context_class: org.hibernate.context.internal.ThreadLocalSessionContext
+    hibernate.hbm2ddl.auto: create
+  maxWaitForConnection: 1s
+  validationQuery: "/* MyApplication Health Check */ SELECT 1"
+  minSize: 8
+  maxSize: 32
+  checkConnectionWhileIdle: false
