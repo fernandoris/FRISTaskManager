@@ -2,7 +2,6 @@ package com.fris.fristaskmanagerbackend.resources;
 
 import com.fris.fristaskmanagerbackend.api.Task;
 import com.fris.fristaskmanagerbackend.persistence.TaskDAO;
-import com.fris.fristaskmanagerbackend.persistence.TaskEntity;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
@@ -13,7 +12,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -44,12 +42,12 @@ class TaskManagerResourceTest {
 
     @Test
     void testGetAllTasks() {
-        List<TaskEntity> tasks = new ArrayList<>();
-        tasks.add(new TaskEntity(1L, "Test Task 1", new Date()));
-        tasks.add(new TaskEntity(2L, "Test Task 2", new Date()));
+        List<Task> tasks = new ArrayList<>();
+        tasks.add(new Task(1L, "Test Task 1", TEST_DATE));
+        tasks.add(new Task(2L, "Test Task 2", TEST_DATE));
         when(taskDAO.findAll()).thenReturn(tasks);
 
-        List<TaskEntity> result = taskManagerResource.getAllTasks();
+        List<Task> result = taskManagerResource.getAllTasks();
 
         assertEquals(tasks.size(), result.size());
     }
@@ -57,7 +55,7 @@ class TaskManagerResourceTest {
     @Test
     void testGetTaskById() {
         String id = "1";
-        TaskEntity task = new TaskEntity(Long.valueOf(id), "Test Task", new Date());
+        Task task = new Task(Long.parseLong(id), "Test Task", TEST_DATE);
         when(taskDAO.findById(id)).thenReturn(task);
 
         Response response = taskManagerResource.getTaskById(id);

@@ -3,7 +3,6 @@ package com.fris.fristaskmanagerbackend.resources;
 import com.codahale.metrics.annotation.Timed;
 import com.fris.fristaskmanagerbackend.api.Task;
 import com.fris.fristaskmanagerbackend.persistence.TaskDAO;
-import com.fris.fristaskmanagerbackend.persistence.TaskEntity;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
@@ -38,7 +37,7 @@ public class TaskManagerResource {
 
     @GET
     @Timed
-    public List<TaskEntity> getAllTasks() {
+    public List<Task> getAllTasks() {
         return taskDAO.findAll();
     }
 
@@ -48,7 +47,7 @@ public class TaskManagerResource {
     public Response getTaskById(
             @PathParam("id") @NotEmpty @Pattern(regexp = "\\d+", message = POSITIVE_NUMBER_MESSAGE) String id
     ) {
-        TaskEntity task = taskDAO.findById(id);
+        Task task = taskDAO.findById(id);
         if (task == null) {
             throwNotFoundException();
         }
