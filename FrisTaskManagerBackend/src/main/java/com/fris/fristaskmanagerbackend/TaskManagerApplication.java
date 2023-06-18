@@ -5,6 +5,8 @@ import com.fris.fristaskmanagerbackend.health.TaskManagerHealthCheck;
 import com.fris.fristaskmanagerbackend.persistence.TaskDAO;
 import com.fris.fristaskmanagerbackend.persistence.TaskEntity;
 import com.fris.fristaskmanagerbackend.resources.TaskManagerResource;
+import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
+import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.core.Application;
 import io.dropwizard.core.setup.Bootstrap;
 import io.dropwizard.core.setup.Environment;
@@ -40,6 +42,11 @@ public class TaskManagerApplication extends Application<TaskManagerConfiguration
     @Override
     public void initialize(Bootstrap<TaskManagerConfiguration> bootstrap) {
         bootstrap.addBundle(hibernate);
+        // Enable variable substitution with environment variables
+        EnvironmentVariableSubstitutor substitutor = new EnvironmentVariableSubstitutor(false);
+        SubstitutingSourceProvider provider =
+                new SubstitutingSourceProvider(bootstrap.getConfigurationSourceProvider(), substitutor);
+        bootstrap.setConfigurationSourceProvider(provider);
     }
 
 }
