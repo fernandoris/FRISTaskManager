@@ -6,15 +6,19 @@ import jakarta.persistence.EntityNotFoundException;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Objects;
 
 public class TaskDAO extends AbstractDAO<TaskEntity> {
+
+    private static final SimpleDateFormat TO_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+
     public TaskDAO(SessionFactory factory) {
         super(factory);
     }
 
-    public TaskEntity findById(Long id) {
+    public TaskEntity findById(String id) {
         Transaction transaction = currentSession().beginTransaction();
         TaskEntity task;
         try {
@@ -28,11 +32,14 @@ public class TaskDAO extends AbstractDAO<TaskEntity> {
     }
 
 
-    public long create(TaskEntity task) {
+    public long create(Task task) {
         long id;
         Transaction transaction = currentSession().beginTransaction();
+
         try {
-            id = persist(task).getId();
+            id = persist(
+                    TaskEntity.builder().tittle(task.getTittle()).date(TO_DATE_FORMAT.parse(task.getDate())).build()
+            ).getId();
             transaction.commit();
         } catch (Exception e) {
             transaction.rollback();
@@ -54,13 +61,13 @@ public class TaskDAO extends AbstractDAO<TaskEntity> {
         return tasks;
     }
 
-    public void update(long id, Task task) {
+    public void update(String id, Task task) {
         Transaction transaction = currentSession().beginTransaction();
         try {
             TaskEntity taskEntity = get(id);
             if(Objects.nonNull(taskEntity)) {
                 taskEntity.setTittle(task.getTittle());
-                taskEntity.setDate(task.getDate());
+                taskEntity.setDate(TO_DATE_FORMAT.parse(task.getDate()));
                 currentSession().merge(taskEntity);
                 transaction.commit();
             } else {
@@ -75,7 +82,7 @@ public class TaskDAO extends AbstractDAO<TaskEntity> {
         }
     }
 
-    public void delete(long id) {
+    public void delete(String id) {
         Transaction transaction = currentSession().beginTransaction();
         try {
             TaskEntity taskEntity = get(id);

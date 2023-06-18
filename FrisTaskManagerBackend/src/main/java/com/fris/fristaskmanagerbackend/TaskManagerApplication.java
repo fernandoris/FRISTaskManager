@@ -34,11 +34,6 @@ public class TaskManagerApplication extends Application<TaskManagerConfiguration
     }
 
     @Override
-    public String getName() {
-        return "hello-world";
-    }
-
-    @Override
     public void initialize(Bootstrap<TaskManagerConfiguration> bootstrap) {
         bootstrap.addBundle(hibernate);
     }

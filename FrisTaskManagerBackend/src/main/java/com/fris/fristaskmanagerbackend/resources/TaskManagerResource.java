@@ -5,6 +5,9 @@ import com.fris.fristaskmanagerbackend.api.Task;
 import com.fris.fristaskmanagerbackend.persistence.TaskDAO;
 import com.fris.fristaskmanagerbackend.persistence.TaskEntity;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Pattern;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -21,13 +24,15 @@ public class TaskManagerResource {
 
     private static final String PATH = "/task/";
 
+    private static final String POSITIVE_NUMBER_MESSAGE = "Must be a positive number";
+
     private final TaskDAO taskDAO;
 
     @POST
     @Timed
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response createTask(Task task) {
-        long id = taskDAO.create(TaskEntity.builder().tittle(task.getTittle()).date(task.getDate()).build());
+    public Response createTask(@Valid Task task) {
+        long id = taskDAO.create(task);
         return Response.created(URI.create(StringUtils.join(PATH, id))).build();
     }
 
@@ -40,7 +45,9 @@ public class TaskManagerResource {
     @GET
     @Timed
     @Path("/{id}")
-    public Response getTaskById(@PathParam("id") long id) {
+    public Response getTaskById(
+            @PathParam("id") @NotEmpty @Pattern(regexp = "\\d+", message = POSITIVE_NUMBER_MESSAGE) String id
+    ) {
         TaskEntity task = taskDAO.findById(id);
         if (task == null) {
             throwNotFoundException();
@@ -52,7 +59,10 @@ public class TaskManagerResource {
     @Timed
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response updateTask(@PathParam("id") long id, Task task) {
+    public Response updateTask(
+            @PathParam("id") @NotEmpty @Pattern(regexp = "\\d+", message = POSITIVE_NUMBER_MESSAGE) String id,
+            @Valid Task task
+    ) {
         try {
             taskDAO.update(id, task);
         } catch (EntityNotFoundException e) {
@@ -64,7 +74,9 @@ public class TaskManagerResource {
     @DELETE
     @Timed
     @Path("/{id}")
-    public Response deleteTask(@PathParam("id") long id) {
+    public Response deleteTask(
+            @PathParam("id") @NotEmpty @Pattern(regexp = "\\d+", message = POSITIVE_NUMBER_MESSAGE) String id
+    ) {
         try {
             taskDAO.delete(id);
         } catch (EntityNotFoundException e) {
