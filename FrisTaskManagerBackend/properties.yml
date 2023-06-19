@@ -1,5 +1,7 @@
 logging:
-  level: WARN
+  level: INFO
+  loggers:
+    com.fris.fristaskmanagerbackend: DEBUG
 database:
   driverClass: com.mysql.cj.jdbc.Driver
   user: ${DB_USER}
