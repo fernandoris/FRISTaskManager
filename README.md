@@ -1,4 +1,4 @@
-# FRISTasManager
+# FRISTaskManager
 
 [![Build Status](https://img.shields.io/travis/your_username/your_repository.svg?style=flat-square)](https://travis-ci.org/your_username/your_repository)
 
